@@ -1,0 +1,770 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+\documentclass{beamer}
+
+
+\mode<presentation>
+{
+  %\usetheme{Warsaw}
+
+%  \setbeamercovered{transparent}
+  % or whatever (possibly just delete it)
+}
+\setbeamertemplate{frametitle}
+  {\begin{centering}\smallskip
+   \insertframetitle\par
+   \smallskip\end{centering}}
+\setbeamertemplate{itemize item}{$\bullet$}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[text line]{%
+    \hfill\strut{%
+        \scriptsize\sf\color{black!60}%
+        \quad\insertframenumber
+    }%
+    \hfill
+}
+
+\usepackage[english]{babel}
+% or whatever
+
+\usepackage[utf8]{inputenc}
+% or whatever		
+
+\usepackage{times}
+\usepackage[T1]{fontenc}
+
+
+\usepackage{mathrsfs}
+\usepackage{mathtools}
+\usepackage{proof} 
+
+
+%% Coq listings need it: %%
+\definecolor{ltblue}{rgb}{0,0.4,0.4}
+\definecolor{dkblue}{rgb}{0,0.05,0.4}
+\definecolor{dkgreen}{rgb}{0,0.35,0}
+\definecolor{dkviolet}{rgb}{0.3,0,0.5}
+\definecolor{dkred}{rgb}{0.5,0,0}
+\definecolor{grey}{rgb}{0.5,0.5,0.6}
+\usepackage{listings}
+\usepackage{lstcoq}
+\lstset{
+basicstyle=\footnotesize,
+columns=fullflexible, 
+language=Coq} 
+
+%settings 
+\everymath{\displaystyle}
+
+%--------
+
+
+\title[and its variations]{Calculus of constructions explained}
+ 
+\author{I.Zhirkov}
+ 
+
+\date{2015}
+\subject{Theoretical Computer Science}
+
+
+% Delete this, if you do not want the table of contents to pop up at
+% the beginning of each subsection:
+\AtBeginSubsection[]
+{
+  \begin{frame}<beamer>{Outline}
+    \tableofcontents[currentsection,currentsubsection]
+  \end{frame}
+}
+
+
+% If you wish to uncover everything in a step-wise fashion, uncomment
+% the following command: 
+
+%\beamerdefaultoverlayspecification{<+->}
+
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+\section{Syntax}
+\begin{frame}
+\frametitle{What is CC?}
+\begin{itemize}
+\item A higher-order formalism  for constructive proofs in natural deduction style;
+\pause
+\item Informally: typed $\lambda$-calculus, where types are normal terms too;
+\item Or: high level functional programming language with a type system rich enough to express any specification.
+\end{itemize}
+\end{frame}
+
+
+ 
+\subsection{Basic syntax}
+\begin{frame}{Basic CC syntax}
+\begin{itemize}
+\item Variables (are typed with other terms).
+\item Application:
+
+$M \: N$
+\item $\lambda$-abstraction:
+
+$ (\lambda x : T ) M $
+
+\item Product operator
+
+$ [x: T] M$
+
+think \textit{forall} or \textit{function type}.
+\item Special constant \textit{*}.
+
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{About *}
+\begin{itemize}
+\item ``Type of all types'';
+\item Type of propositions;
+\item Products over * are special (are called \textit{contexts});
+\item Has no type itself.
+\end{itemize}
+\end{frame}
+
+\subsection{Contexts and objects}
+
+\begin{frame}{Contexts}
+We will call some of terms \textbf{contexts}.
+
+Contexts are lists.
+
+\begin{itemize}
+\item Nil = *
+\item Cons = Product operator
+\end{itemize} 
+
+$$ * \in C^n$$
+
+$$ [x:M] N \in C^n, M \in \Lambda^n,  N \in C^{n+1}$$
+
+$x$ may occur in $N$, not in $M$
+
+Contexts have no type (cause * has none).
+
+Contexts are type of proposition schemas (think nat->bool->Prop), declaring their parameters.
+
+\end{frame}
+
+\begin{frame}{Terms can be}
+\begin{itemize}
+\item Contexts (products over *);
+\item Objects;
+\pause
+\begin{itemize}
+\item Objects of type * are \textbf	{usual types} aka \textbf{propositions};
+\item Other objects.
+\end{itemize}
+\end{itemize}
+
+\pause
+
+$$\Lambda = C \cup O$$
+$$\Lambda^n = C^n \cup O^n$$
+$$O = \bigcup_{n\geq 0}  O^n, \quad C = \bigcup_{n\geq 0}  C^n$$
+
+$[\text{variables' de Bruijn indices}] \leq n$
+
+$\Lambda$ denotes all terms;
+
+$C$ or $\Lambda_o$ -- contexts;
+
+$O$ or $\Lambda_l$ -- objects.
+
+\end{frame}
+
+
+
+\begin{frame}{Objects}
+
+\begin{itemize}
+\item Variables (think de Bruijn indexes)
+
+\begin{center}
+$ k \in O^n$, if $1 \leq k \leq n$
+\end{center}
+\item Product
+
+\begin{center}
+$ [x : M ] N \in O^n$, if  $M \in \Lambda^n$, $N \in O^{n+1} $
+\end{center}
+
+\item Abstraction
+\begin{center}
+$ ( \lambda x : M) N \in O^n $, if $ M \in \Lambda^n$, $N \in O^{n+1}$
+\end{center}
+
+\item Application
+\begin{center}
+$(M \; N) \in O^n$, if $M, N \in O^n$
+\end{center}
+
+\end{itemize}
+\end{frame}
+
+
+\section{Interpretation}
+\begin{frame}{Two relations, two kinds of judgements}
+\begin{itemize}
+
+\item $\Gamma \vdash \Delta$
+
+$\Delta$ \textit{is valid in a valid context } $\Gamma$
+
+
+\item $\Gamma \vdash M : N$
+
+In valid  $\Gamma$, $M$ is well-typed of type $N$
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Inference}
+
+Contexts:
+
+$$\infer{\vdash *}{}$$
+
+$$\infer{\Gamma [ x : \Delta ] \vdash *}{\Gamma \vdash \Delta}$$
+
+$$\infer{\Gamma [ x : M ] \vdash *}{\Gamma \vdash M : *}$$
+
+\pause
+Product:
+
+$$\infer{\Gamma \vdash [x:M] \Delta}{\Gamma [x:M] \vdash \Delta}$$
+
+$$\infer{\Gamma \vdash [x:M_1] M_2 : * }{\Gamma [x:M_1] \vdash M_2 : *}$$
+\end{frame}
+
+
+\begin{frame}{Inference}
+\begin{itemize}
+\item Variables ($ l \leq | \Gamma | $)
+
+$$\infer{\Gamma \vdash l : \Gamma / l} {\Gamma \vdash *}$$
+
+\item Abstraction
+$$\infer{\Gamma \vdash (\lambda x : M_1) M_2 : [x:M_1] P}{\Gamma [x:M_1] \vdash M_2 : P}$$
+
+\item Application
+
+$$\infer{\Gamma \vdash (M N ) : [N/x]Q}{\Gamma \vdash M : [x:P] Q & \Gamma \vdash N:P}$$
+
+\textit{this is substitution $N \mapsto 1$,being var idx}
+
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Note on predicativity}
+
+\textit{A \textbf{predicative} system enforces the constraint that, when an object is defined using some sort of quantifier, none of the quantifiers may ever be instantiated with the object itself.} 
+
+Avoid naive set theory paradoxes. 
+
+\begin{itemize}
+\pause
+\item Martin-Loef type theory has a hierarchy of type universes (predicative):
+
+$$( [A: U_i] A ) : U_{i+1}$$
+
+\pause
+\item Calculus of constructions has only one universe $*$ and is nonpredicative:
+
+$$( [A: *] A ) : *$$
+
+$*$ has no type however.
+
+%\textit{In nonpredicative CoC inductive entities can be defined.}
+\end{itemize}
+
+\end{frame}
+
+
+
+\begin{frame}{Note on predicativity}
+
+\begin{itemize}
+\item Adding $\infer{* \vdash * : *}{}$ results in Girard paradox (each type is inhabited).
+\end{itemize}
+
+  
+\end{frame}
+
+
+
+\subsection{Conversion rules}
+
+\begin{frame}{Third kind of judgements}
+
+\begin{itemize}
+
+\item $\Gamma \vdash \Delta$
+
+$\Delta$ \textit{is valid in a valid context } $\Gamma$
+
+
+\item $\Gamma \vdash M : N$
+
+\textit{In valid } $\Gamma$, $M$ is well-typed of type $N$
+
+
+\item $\Gamma \vdash M \cong N$
+
+\textit{$M$ is convertible to $N$ in $\Gamma$.}
+
+Smallest congruence over terms w.r.t. $\beta$ reduction. 
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Kinds of calculus of constructions}
+\begin{itemize}
+\item Restricted -- $\beta$-reduction only on 'logical' level (in types)
+\item Full -- $\beta$-reduction on both type level and term level is allowed.
+\end{itemize}
+
+
+Restricted's only use is a simplier proof of decidability of three judgements.
+\end{frame}
+
+
+\subsubsection{Restricted CC}
+\begin{frame}{$\beta$-reduction rules for restricted CoC}
+Symmetry, transitivity of $\cong$;
+
+\textit{$\Delta$ is a context}
+
+$$\infer{\Gamma \vdash \Delta \cong \Delta}{\Gamma \vdash \Delta}$$
+
+\pause
+$$\infer{\Gamma \vdash M \cong M}{\Gamma \vdash M: \Delta}$$  
+\pause
+$$\infer{\Gamma \vdash [x:P_1] \; M_1 \cong [x : P_2] M_2} {\Gamma \vdash P_1 \cong P_2 & \quad \Gamma [x: P_1] \vdash M_1 \cong M_2 } $$
+ 
+\pause
+$$\infer{\Gamma \vdash (\lambda x:P_1) M_1 \cong (\lambda x : P_2) M_2} {\Gamma \vdash P_1 \cong P_2 & \quad \Gamma [x: P_1] \vdash M_1 \cong M_2 & \quad \Gamma [x: P_1] \vdash M_1 : \Delta_1} $$
+ 
+
+\end{frame}
+
+\begin{frame}{$\beta$-reduction rules for restricted CoC - 2}
+ 
+ 
+$$\infer{\Gamma \vdash (M \; N) \cong (M_1 \; N)} {\Gamma \vdash (M \; N) : \Delta & \quad \Gamma \vdash M \cong M_1} $$
+
+$$\infer{\Gamma \vdash (M \; N) \cong (M \; N_1)}{\Gamma \vdash (M \; N) : \Delta & \quad \Gamma \vdash N \cong N_1}$$
+
+$$\infer{\Gamma \vdash ((\lambda x : P) M \; N) \cong [N/x] M}{\Gamma[x:P]\vdash M:\Delta & \quad \Gamma \vdash N: P} $$
+
+ $\beta$-reduction only for ``logical'' redexes.
+
+ 
+$$\infer{\Gamma \vdash M : Q}{\Gamma \vdash M:P & \quad \Gamma \vdash P \cong Q}$$
+
+
+For restricted CoC decidability of judgements is proven independently from normalization theorem. 
+
+\end{frame}
+
+
+\subsubsection{Full CC}
+
+\begin{frame}{$\beta$-reduction rules for full CoC-1}
+Symmetry, transitivity of $\cong$;
+
+
+$$\infer{\Gamma \vdash M \cong M }{\Gamma \vdash M: N}$$  
+
+
+$$\infer{\Gamma \vdash [x:P_1] \; M_1 \cong [x : P_2] M_2} {\Gamma \vdash P_1 \cong P_2 & \quad \Gamma [x: P_1] \vdash M_1 \cong M_2 } $$
+ 
+\pause
+$$\infer{\Gamma \vdash (\lambda x:P_1) M_1 \cong (\lambda x : P_2) M_2} {\Gamma \vdash P_1 \cong P_2 & \quad \Gamma [x: P_1] \vdash M_1 \cong M_2 & \quad \Gamma [x: P_1] \vdash M_1 : N_1} $$
+
+
+\end{frame}
+
+\begin{frame}{$\beta$-reduction rules for full CoC-2}
+
+$$\infer{\Gamma \vdash (M \; N) \cong (M_1 \; N_1)} {\Gamma \vdash (M \; N) : P & \quad \Gamma \vdash M \cong M_1 & \quad \Gamma \vdash N \cong N_1} $$
+
+$$\infer{\Gamma \vdash ((\lambda x : A) M \; N) \cong [N/x] M}{\Gamma[x:A] \vdash M:P & \quad \Gamma \vdash N: A}$$
+
+\end{frame}
+
+
+\begin{frame}{Comparison-1}
+\begin{itemize}
+\item Restricted
+$$\infer{\Gamma \vdash M \cong M}{\Gamma \vdash M: \Delta}$$  
+
+\item Full
+$$\infer{\Gamma \vdash M \cong M }{\Gamma \vdash M: N}$$  
+
+
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Comparison-2}
+\begin{itemize}
+\item Restricted
+$$\infer{\Gamma \vdash (\lambda x:P_1) M_1 \cong (\lambda x : P_2) M_2} {\Gamma \vdash P_1 \cong P_2 & \quad \Gamma [x: P_1] \vdash M_1 \cong M_2 & \quad \Gamma [x: P_1] \vdash M_1 : \Delta_1} $$
+
+\item Full
+$$\infer{\Gamma \vdash (\lambda x:P_1) M_1 \cong (\lambda x : P_2) M_2} {\Gamma \vdash P_1 \cong P_2 & \quad \Gamma [x: P_1] \vdash M_1 \cong M_2 & \quad \Gamma [x: P_1] \vdash M_1 : N_1} $$
+
+
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Comparison-3}
+\begin{itemize}
+\item Restricted
+$$\infer{\Gamma \vdash (M \; N) \cong (M_1 \; N)} {\Gamma \vdash (M \; N) : \Delta & \quad \Gamma \vdash M \cong M_1} $$
+
+$$\infer{\Gamma \vdash (M \; N) \cong (M \; N_1)}{\Gamma \vdash (M \; N) : \Delta & \quad \Gamma \vdash N \cong N_1}$$
+
+\item Full
+$$\infer{\Gamma \vdash (M \; N) \cong (M_1 \; N_1)} {\Gamma \vdash (M \; N) : P & \quad \Gamma \vdash M \cong M_1 & \quad \Gamma \vdash N \cong N_1} $$
+
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Comparison-4}
+\begin{itemize}
+\item Restricted
+$$\infer{\Gamma \vdash ((\lambda x : P) M \; N) \cong [N/x] M}{\Gamma[x:P]\vdash M:\Delta & \quad \Gamma \vdash N: P}$$
+ 
+\item Full
+$$\infer{\Gamma \vdash ((\lambda x : A) M \; N) \cong [N/x] M}{\Gamma[x:A] \vdash M:P & \quad \Gamma \vdash N: A}$$
+ 
+\end{itemize}
+\end{frame}
+
+
+\subsection{Stripping}
+
+
+\begin{frame}{Stripping}
+\begin{itemize}
+\item We can get rid of specification and extract untyped $\lambda$-term, representing computation.
+\item Contexts get rid of quantifications over contexts;
+
+Why? A context is a type of proposition schemas, its inhabitants are not part of computation process.
+
+%$$j^* = Id_0$$
+%$$\Gamma = \Delta [x: \text{Ctx} ] \Rightarrow  j_{\Gamma}(k) = j_{\Delta}(k) + 1$$
+%$$\Gamma = \Delta [x: \text{Obj} ] \Rightarrow  j_{\Gamma}(k+1) = j_{\Delta}(k) + 1,\quad j_{\Gamma}(1) = 1$$
+
+\end{itemize}
+\end{frame}
+  
+
+\begin{frame}[fragile]{Stripping for $\Gamma \vdash M : Obj$}
+\textbf{Context arity} $\alpha_{\Gamma}$ -- how many elements of list are objects;
+
+\textbf{Canonical injection} $j_{\Gamma} : \{1 \dots \alpha_{\Gamma} \} \rightarrow \Gamma$ -- indices of objects in $\Gamma$. 
+
+\textbf{Stripped algorithm} $\nu_{\Gamma}(M)$: 
+
+\begin{itemize}
+\item Variable: 
+
+$\nu_{\Gamma}(k) \coloneqq j_{\Gamma}^{-1}(k)$
+\item Application:
+
+$\nu_{\Gamma}( (M:\_) (N: \text{Ctx}) ) \coloneqq  \nu_{\Gamma}(M)$
+
+$\nu_{\Gamma}( (M:\_) (N: \text{Obj}) ) \coloneqq  \nu_{\Gamma}(M)\; \nu_{\Gamma}(N)$
+
+\item Abstraction:
+
+$\begin{cases}
+\nu_{\Gamma}( (\lambda x: \text{Obj}_1 \;  N: \text{Obj}_2 ) \coloneqq \lambda x. \nu_{\Delta}( N ) , \quad & \Delta = \Gamma [x: \text{Obj}_1] \\
+\nu_{\Gamma}( (\lambda x: \text{Ctx} \; \;  N: \text{Obj} ) \coloneqq \nu_{\Delta}( N ) , \quad & \Delta = \Gamma [x: \text{Ctx}] 
+\end{cases} $ 
+
+
+\end{itemize}
+
+
+
+\end{frame}
+
+\subsection{Constructions}
+
+\begin{frame}{Interpretation of constructions}
+\begin{itemize}
+\item Take all closed terms, add special constant:
+
+$$\mathscr{I} = \Lambda^0 \cup \{ \Omega \}$$
+
+\item $A \subset \mathscr{I}$ is \textbf{saturated} iff:
+
+\begin{enumerate}
+\item $\Omega \in A$
+\item $SN(b_1) \dots SN(b_n)  \Rightarrow (\Omega b_1 \dots b_n) \in A$
+\item all elements in $A$ are $SN$
+\item $SN(b) \Rightarrow (([ b/x ] a) b_1 \dots b_n) \in A \Rightarrow (((\lambda x. a) b) b_1\dots b_n) \in A$
+\end{enumerate}
+\item $\mathscr{U}$ -- all saturated subsets of $\mathscr{I}$
+\end{itemize}
+\textit{SN} denotes \textit{strongly normalisable}
+
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Dependent product}
+
+\begin{definition}
+If $A \in \mathscr{U}$ , $F \in \mathscr{I} \rightarrow \mathscr{U}$, then 
+$\Pi(A,F) \coloneqq \{ t \in \mathscr{I} | \forall x \in A : \; (t \; x) \in F(x)\}$
+
+\end{definition}
+
+~
+ 
+$\mathscr{I}$ are programs, $\mathscr{U}$ are types, $\mathscr{I}\rightarrow \mathscr{U}$ are dependent types.
+
+\begin{lemma}
+$\mathscr{U}$ is closed under arbitrary intersection and union.
+
+\end{lemma}
+
+$\Omega$ is only needed during proof. 
+
+
+\end{frame}
+
+
+\begin{frame}{Functionality}
+\begin{definition}[restricted calculus]
+$\phi(\mbox{Object}) \coloneqq  \mathscr{I} $
+
+$\phi(*) \coloneqq \mathscr{U}$
+
+$\phi([x:P]\Gamma) = \phi(P) \rightarrow \phi(\Gamma) \quad\quad \mbox{(set of all such functions)}$
+
+\end{definition}
+
+
+\begin{definition}[full calculus]
+$\phi(\mbox{Object}) \coloneqq  \mathscr{I} $
+
+$\phi(*) \coloneqq \mathscr{U}$
+
+$\phi([x:\Delta]\Gamma) = \phi(\Delta) \rightarrow \phi(\Gamma)$
+
+$\phi([x:P]\Gamma) = \{ f \in \phi(P) \rightarrow \phi(\Gamma)  | t \cong u \Rightarrow f(t) = f(u) \}$
+
+
+Why? cause arbitrary $\beta$-reduction is allowed.
+
+\end{definition}
+\end{frame}
+
+\begin{frame}{Environment}
+\begin{definition} 
+For $\Gamma = [x_n: A_n] \cdots [x_1: A_1]*$ \textbf{environment} is a product:
+
+$\Phi(\Gamma) = \phi(A_n) \times \dots \times \phi(A_1)$
+\end{definition}
+
+\end{frame}
+
+\begin{frame}{$\Gamma \vdash M : \text{Obj}$}
+Interpretation: $\rho_{\Gamma}(M): \Phi(\Gamma) \rightarrow\phi(\text{Obj})$
+
+
+$\nu_{\Gamma}(M)$ is an $\alpha_{\Gamma}$-ary function $\mathscr{I} ^{\alpha_{\Gamma}} \rightarrow \mathscr{I}$ (maps arguments to its $\alpha_{\Gamma}$ free variables).
+
+recall that $\alpha_{\Gamma}$ is context arity. 
+
+
+
+$\pi_{\Gamma} : \Phi(\Gamma) \rightarrow \mathscr{I}^{\alpha_{\Gamma}}$ is defined by type forgetting $j_{\Gamma}.$
+
+Interpretation: $\rho_{\Gamma}(M) = \nu_{\Gamma}(M) \circ \pi_{\Gamma}$
+
+``untype $M$ and forget about quantifications over contexts''
+\end{frame}
+
+\begin{frame}{$\Gamma \vdash M : \text{Ctx} $}
+
+$\rho_{\Gamma}(M): \Phi(\Gamma) \rightarrow\phi(\text{Ctx})$
+
+\begin{itemize}
+\item Product:
+\begin{itemize}
+\item $\Gamma \vdash [x: \text{Ctx}] M : * $
+
+$f: \Phi(\Gamma)\times \phi(\text{Ctx})  \rightarrow \mathscr{U}$
+
+$f \coloneqq \rho_{\Gamma [x: \text{Ctx}]}(M)$
+
+$$\rho_{\Gamma}([x: \text{Ctx}] M) \coloneqq a \mapsto \bigcap \{ f(a,x) | x \in \phi(\text{Ctx}) \}, \quad a \in \Phi(\Gamma)$$
+
+\item $\Gamma \vdash [x: \text{Obj}] M : * $
+
+
+$f : \Phi(\Gamma)\rightarrow \mathscr{U}, \quad \, \, \, \quad g : \Phi(\Gamma) \times \mathscr{I} \rightarrow \mathscr{U}$
+$f \coloneqq \rho_{\Gamma[x:\text{Obj}]}(\text{Obj}), \quad g \coloneqq \rho_{\Gamma[x:\text{Obj}]}(M)$
+
+$$\rho_{\Gamma}([x: \text{Obj}] M) \coloneq a \mapsto \Pi(f(a), g(a)), \quad a \in \Phi(\Gamma)$$
+
+
+\end{itemize}
+\end{itemize}
+
+
+\end{frame}
+
+\begin{frame}{$\Gamma \vdash M : \text{Ctx} $}
+
+$\rho_{\Gamma}(M): \Phi(\Gamma) \rightarrow\phi(\text{Ctx})$
+
+\begin{itemize}
+\item Variable: $\rho_{\Gamma}(x)$ selects $x$-th variable from context.
+\item Abstraction: 
+
+$\Gamma \vdash (\lambda x: M) \; N : [x:M]P$
+
+$f : \Phi(\Gamma) \times \phi(M) \rightarrow \phi(P)$
+
+$f \coloneqq \rho_{\Gamma[x:M]}(N)$
+
+$$\rho_{\Gamma} ((\lambda x: M) N) \coloneqq a \mapsto \bigg(x \mapsto f(a,x)\bigg)$$
+
+\item Application
+
+$\Gamma \vdash (M \; N) : [N/x] P$
+
+$$\rho_{\Gamma} ((M \; N)) \coloneqq  y \mapsto \rho_{\Gamma}(M)(y, \rho_{\Gamma}(N,y))$$
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Interpretation of contexts}
+Inductively defined on formation of $\Gamma \vdash *$  (routine).
+
+$D(\Gamma) \xhookrightarrow{} \Phi(\Gamma)$
+
+\begin{itemize}
+\item $\vdash *$ implies $D(\Gamma) = \Phi(\Gamma) = 1$
+
+\item $\Gamma[x:\text{Obj}] \vdash * $ implies $D(\Gamma[x:\text{Obj}]) \coloneqq \{(a,x) | a \in D(\Gamma) \land x \in \rho_{\Gamma}(M)(a)\}$
+
+\item $\Gamma[x:\text{Ctx}] \vdash * $ implies $D(\Gamma[x:\text{Ctx}]) \coloneqq \{(a,x) | a \in D(\Gamma) \land x \in \phi(\text{Ctx}))\} $ 
+
+$= D(\Gamma) \times \phi(\text{Ctx})$
+\end{itemize} 
+\begin{example}
+$[A: *][x:A] \vdash * $ is interpreted as $\{(A,x) \in \mathscr{U} \times \mathscr{I} | x\in A\}$.
+\end{example}
+
+\end{frame}
+
+\begin{frame}
+
+    
+    If $\Gamma \vdash M: N$ and $\Gamma \vdash N : *$, then for all $x \in D(\Gamma)$ pure $\lambda$-term $\rho_{\Gamma}(M,x)$ is an element of saturated set $\rho_{\Gamma}(P,x)$  
+
+    \begin{example}
+
+If $[A:*][x:A] \vdash x:A$ then with $\Gamma = [A:*][x:A]$ we have $D(\Gamma)  = \{ (A,x) \in \mathscr{U} \times \mathscr{I} | x \in A \}$.
+
+$[A:* ] [x:A] \Gamma \vdash x:A$ is interpreted as  $f: \mathscr{U} \times \mathscr{I} \rightarrow \mathscr{I}$, which maps $(A,x) \mapsto x$.
+    \end{example}
+
+
+\end{frame}
+\subsection{Properties}
+
+\begin{frame}
+\begin{itemize}
+\item 
+\item $\Gamma \vdash Judgement$ is decidable (restricted);
+\item $\Gamma \vdash M:N$ deducing $N$ from $\Gamma$ and $M$ is decidable(restricted, full);
+\item Strongly normalizable (restricted,full).
+\item $\Gamma \vdash M \cong N \Rightarrow \phi(M) = \phi(N)$
+\end{itemize}
+\end{frame}
+
+
+
+\section{Modifications}
+\begin{frame}{CoC modifications}
+\begin{itemize}
+\item Calculus of Constructions;
+\item Calculus of Constructions with Inductive Definitions;
+\item Coq v7: Calculus of (Co)Inductive constructions (Cic);
+\item Coq v8: Predicative Calculus of (Co)Inductive constructions (pCic)
+\end{itemize}
+\end{frame}
+\subsection{Utility tweaks}
+\begin{frame}{Utility tweaks}
+\begin{itemize}
+\item Global environement;
+\item Typing rules consider environement;
+\item Additional reductions for \textit{let... in...} constructs and global definitions;
+\end{itemize}
+\end{frame}
+
+
+\subsection{Universes, impredicativity}
+\begin{frame}[fragile]{Universes and impredicativity}
+\begin{itemize}
+\item Coq has many type universes (sorts): \textit{Set}, \textit{Prop}, \textit{Type}$_i$ for $i \in \mathbb{N}$
+\item $Set$ : $Type_0$, $Prop$ : $Type_0$, $Type_0$ : $Type_1$ etc.
+\item Since Coq v8 \textit{Set} is predicative by default (unless launched with \texttt{-impredicative-set}), so such definitions
+
+\begin{lstlisting} 
+Definition nat : Set := forall (C:Set), C -> (C->C) ->C.
+\end{lstlisting}
+
+are not allowed.
+\end{itemize}
+\end{frame}
+\subsection{Inductive definitions}
+\begin{frame}[fragile]{Inductive definitions}
+In nonpredicative CoC inductive types are expressed as non first-class objects.
+
+\begin{lstlisting}
+Definition nat : Set := forall (C:Set), C -> (C -> C) -> C.
+Definition zero : nat := fun C z f => z.
+Definition succ : nat -> nat := fun n C z f => f (n C z f).
+\end{lstlisting}
+
+\end{frame}
+
+%\section{CIC  Coq}
+%\subsection{On match}
+
+\end{document}
+
+
