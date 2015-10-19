@@ -131,9 +131,9 @@ h\ (Cons \ a\ as) &=  f\ a\ (h\ as)
 \begin{itemize}
 \item ``generalized unfold''
 
-$p:\ B\rightarrow Bool$
+$p::\ B\rightarrow Bool$
 
-$g: B \rightarrow (A,B)$ 
+$g:: B \rightarrow (A,B)$ 
 
 
 ~
@@ -172,7 +172,7 @@ $p:\ A\rightarrow Bool$
 \begin{align*}
 h::&\   \rightarrow List\ A\\ 
 h\ a &= c, & p \ a \\
-h\ b &= f b (h\ a'), & otherwise
+h\ b &= f\ b (h\ a'), & otherwise
 \end{align*}
 
 where $(b, a') = g\ a$
@@ -189,7 +189,7 @@ where $(b, a') = g\ a$
 
 \item Is a composition of anamorphism and catamorphism
 
-$[\![(c,f), (g,p)]\!] = (\!|c, f|\!) \cdot [\!(g, p)\!]$
+$[\![(c,f), (g,p)]\!] = (\!|c, f|\!) \circ [\!(g, p)\!]$
 
 \item \textit{Look at the whiteboard for a fancy call-tree image}
 \item Example: factorial is $[\![(1, \times), (g,p)]\!]$, where:
@@ -225,9 +225,61 @@ h\ (\text{Cons}\ x\ xs ) &= f\ x\ xs\ (h\ xs)
 
 \end{frame}
 
+\begin{frame}{Category}
+$C = (obj, hom, \circ)$
+
+Objects and morphisms between objects with their compositions.
+
+Laws:
+\begin{itemize}
+\item Identity morphisms for each object
+\item Composition is associative
+\item Path equality
+\end{itemize}
+
+``Point'' is synonymous to ``Object''
+\end{frame}
+
+
+\begin{frame}{Categories: $Set$}
+\begin{itemize}
+\item $ob(Set)$ -- all sets
+\item $hom(E,F)$ -- functions between sets $E$ and $F$
+\item $\circ$ -- composition
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Categories: $Set$}
+\begin{itemize}
+\item $ob(Set)$ -- all sets
+\item $hom(E,F)$ -- functions between sets $E$ and $F$
+\item $\circ$ -- composition
+\item Note: $ob(Set)$ is not a set itself (is a class).
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Categories}
+\begin{itemize}
+\item $Mon$: (monoids, morphisms, composition)
+\item $Grp$: (groups, morphisms, composition)
+\item $Hask$: (haskell types, functions, \hasqel{(.)})
+\item ...
+\end{itemize}
+
+\end{frame}
+
 \begin{frame}{Functor}
 \begin{itemize}
-\item an (endo-)functor is an operation from types to types
+\item Functor is a morphism between categories (preserves structures)
+\end{itemize}
+
+\end{frame}
+\begin{frame}{Functor in FP}
+\begin{itemize}
+\item an (endo-)functor is an operation from types to types (from Hask to Hask)
 \item preserves identity and composition.
 \item functions can be 'mapped over' functors
 \item Basic ones: identity, product, sum (tagged), arrow \dots
@@ -276,7 +328,7 @@ $(C, F, A, m)$
 \item Category $C$ ($Hask$, points are types of Haskell)
 \item Endofunctor $F$ (maps Hask points into other Hask points)
 \item Point $A$ (\textbf{carrier}) of category $C$ (some type).
-\item Function $m$ mapping $(F A) \rightarrow A$
+\item Function $m$ mapping $F\ A \rightarrow A$
 \end{itemize}
  
 Hence our definition:
@@ -300,7 +352,7 @@ $C$ is implied ($Hask$), $F$ and $A$ are type-level, the rest is $m$, the functi
 
 \item $\exists$ a homomorphism from initial algebra to any other algebra.
 
-\item Assume: carrier is \hasqel{Fix}, algebra is \hasqel{Fx} (its ctor).
+\item Assume: carrier is \hasqel{Fix f}, algebra is \hasqel{Fx} (its ctor).
 
 \hin{55}{55}
 \hin{63}{65}
@@ -417,9 +469,9 @@ $
 ~~~~~becomes 
 $
 \begin{CD}
-f (\text{Fix} \ f) @>\text{fmap} \ g>> f\ a\\
+f (\text{Fix} \ f) @<\text{fmap} \ g<< f\ a\\
 @AAunFixA @AAcoalgA\\
-\text{Fix} \ f @>g>> a
+\text{Fix} \ f @<g<< a
 \end{CD}
 $
 
@@ -430,12 +482,34 @@ $
 ~
 The same reasoning about initial coalgebra applies.
 
-Fx and unFix are inverses.
 
-$g$ can be defined with Fx, fmap and evaluator.
+\end{frame}
 
-We will call \textbf{in} the coalgebra evaluator and \textbf{out} the algebra one.
 
+\begin{frame}{Coalgebra-2}
+$\mu$ combines Fx and unFix. 
+
+\hin{141}{141}
+
+\hin{142}{142}
+\hin{55}{55}
+\hin{145}{149}
+\end{frame}
+
+\begin{frame}{Coalgebra-3}
+
+As $out$ is an initial algebra, $in$ is a terminal coalgebra (there exists a unique homomorphism from any coalgebra to $in$).
+\begin{center}
+
+$
+\begin{CD}
+f (\mu \ f) @<\text{fmap} \ g<< f\ a\\
+@VVinV @AAcoalgA\\
+\mu \ f @<g<< a
+\end{CD}
+$
+
+\end{center}
 \end{frame}
 
 \begin{frame}{Notation summary}
@@ -449,10 +523,16 @@ $(\!|\phi|\!)_F = \mu(\phi \xleftarrow{F} out)$
 
 $[\!(\psi)\!]_F = \mu(in \xleftarrow{F} \psi )$ 
 
+\item Anamorphism:
+
+$[\!(\psi)\!]_F = \mu(in \xleftarrow{F} \psi )$ 
+
 
 \end{itemize}
 
 \end{frame}
+
+
 
 
 \begin{frame}
