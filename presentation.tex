@@ -220,7 +220,7 @@ h\ \text{Nil}& = b\\
 h\ (\text{Cons}\ x\ xs ) &= f\ x\ xs\ (h\ xs)
 \end{align*}
 
-\item Notation: $[\!\langle b, f ]\!\rangle$
+\item Notation: $\langle\![ b, f ]\!\rangle$
 \end{itemize}
 
 \end{frame}
@@ -342,7 +342,7 @@ $
 \begin{CD}
 f (\text{Fix} \ f) @>\text{fmap} \ g>> f\ a\\
 @VVFxV @VValgV\\
-\text{Fix} \ f @>g>> D
+\text{Fix} \ f @>g>> a
 \end{CD}
 $
 
@@ -360,7 +360,7 @@ $
 \begin{CD}
 f (\text{Fix} \ f) @>\text{fmap} \ g>> f\ a\\
 @VVFxV @VValgV\\
-\text{Fix} \ f @>g>> D
+\text{Fix} \ f @>g>> a
 \end{CD}
 $
 ~~~~~becomes 
@@ -368,7 +368,7 @@ $
 \begin{CD}
 f (\text{Fix} \ f) @>\text{fmap} \ g>> f\ a\\
 @AAunFixA @VValgV\\
-\text{Fix} \ f @>g>> D
+\text{Fix} \ f @>g>> a
 \end{CD}
 $
 
@@ -399,6 +399,60 @@ cata alg :: Fix ExprF -> String
 \end{frame}
 
 
+\begin{frame}[fragile]{Coalgebra}
+
+Algebra: $f\ a \rightarrow a$
+
+Coalgebra: $a \rightarrow f\ a$
+
+~
+
+$
+\begin{CD}
+f (\text{Fix} \ f) @>\text{fmap} \ g>> f\ a\\
+@VVFxV @VValgV\\
+\text{Fix} \ f @>g>> a
+\end{CD}
+$
+~~~~~becomes 
+$
+\begin{CD}
+f (\text{Fix} \ f) @>\text{fmap} \ g>> f\ a\\
+@AAunFixA @AAcoalgA\\
+\text{Fix} \ f @>g>> a
+\end{CD}
+$
+
+~
+
+~
+
+~
+The same reasoning about initial coalgebra applies.
+
+Fx and unFix are inverses.
+
+$g$ can be defined with Fx, fmap and evaluator.
+
+We will call \textbf{in} the coalgebra evaluator and \textbf{out} the algebra one.
+
+\end{frame}
+
+\begin{frame}{Notation summary}
+Expanding notation to arbitrary types:
+\begin{itemize}
+\item Catamorphism:
+
+$(\!|\phi|\!)_F = \mu(\phi \xleftarrow{F} out)$ 
+
+\item Anamorphism:
+
+$[\!(\psi)\!]_F = \mu(in \xleftarrow{F} \psi )$ 
+
+
+\end{itemize}
+
+\end{frame}
 
 
 \begin{frame}
