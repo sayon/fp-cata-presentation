@@ -523,20 +523,43 @@ $(\!|\phi|\!)_F = \mu(\phi \xleftarrow{F} out)$
 
 $[\!(\psi)\!]_F = \mu(in \xleftarrow{F} \psi )$ 
 
-\item Anamorphism:
+\item Paramorphism:
 
-$[\!(\psi)\!]_F = \mu(in \xleftarrow{F} \psi )$ 
+$[\![\phi, \psi)\!]_F = \mu(\phi \xleftarrow{F} \psi )$ 
 
-
+The argument over the arrow is a part of three-operand composition in between its left and right operands.
 \end{itemize}
 
 \end{frame}
 
-
-
-
 \begin{frame}
-``Actually, even in Haskell recursion is not completely first class because the compiler does a terrible job of optimizing recursive code. This is why F-algebras and F-coalgebras are pervasive in high-performance Haskell libraries like vector, because they transform recursive code to non-recursive code, and the compiler does an amazing job of optimizing non-recursive code.''
+For each morphism type we give:
+\begin{itemize}
+\item Evaluation rule
+\item Uniqueness property
+\item Fusion law (class-preserving functions mapping over morphism)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Utility: fixed point fusion}
+
+$f ( \bot ) = \bot \land f \circ g = h \circ f \Rightarrow f (\mu g) = \mu h $
+
+\end{frame}
+
+\begin{frame}[fragile]{Catamorphism}
+\begin{itemize}
+\item Evaluation rule:
+
+$$(\!| \phi |\!)\circ in = \phi \circ (\!| \phi |\!)$$
+
+Apply recursively, then $\phi$ again.
+
+\end{itemize}
+
+\end{frame}
+\begin{frame}
+``Actually, even in Haskell recursion is not completely first class because the compiler does a terrible job of optimizing recursive code. This is why F-algebras and F-coalgebras are pervasive in high-performance Haskell libraries like vector, because they transform recursive code to non-recursive code, and the compiler does an amazing job of optimizing non-recursive code.'' (Gabriel Gonzales)
 
 \end{frame}
 \begin{frame}
