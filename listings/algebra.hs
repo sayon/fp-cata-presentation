@@ -163,9 +163,20 @@ showF :: (Show a) => List' a -> String
 showF (In Nil') = "NIL"
 showF (In (Cons' x xs)) = (show x) ++ ";" ++ (showF xs)
 
+
+
+mu f = f (mu f)
+
+cata_fix :: Functor f => Algebra f a -> (Mu f -> a)
+cata_fix = mu (\f alg-> alg . fmap (f alg) . out)
+
+anam_fix :: Functor f => CoAlgebra f a -> (a -> Mu f)
+anam_fix = mu (\f coalg-> In. fmap (f coalg) . coalg )
+
+-- Actually, even in Haskell recursion is not completely first class because the compiler does a terrible job of optimizing recursive code. This is why F-algebras and F-coalgebras are pervasive in high-performance Haskell libraries like vector, because they transform recursive code to non-recursive code, and the compiler does an amazing job of optimizing non-recursive code.
+
 main = do
     print $ (cata algSum) lst
     print $ foldr (\e acc -> e + acc) 0 [2, 3, 4]
     print $ showF $ anam coalg 10
---
--- Actually, even in Haskell recursion is not completely first class because the compiler does a terrible job of optimizing recursive code. This is why F-algebras and F-coalgebras are pervasive in high-performance Haskell libraries like vector, because they transform recursive code to non-recursive code, and the compiler does an amazing job of optimizing non-recursive code.
+

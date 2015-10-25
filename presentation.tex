@@ -170,9 +170,9 @@ $p:\ A\rightarrow Bool$
 ~
 
 \begin{align*}
-h::&\   \rightarrow List\ A\\ 
+h::&\   A \rightarrow C\\
 h\ a &= c, & p \ a \\
-h\ b &= f\ b (h\ a'), & otherwise
+ &= f\ b (h\ a'), & otherwise
 \end{align*}
 
 where $(b, a') = g\ a$
@@ -222,6 +222,11 @@ h\ (\text{Cons}\ x\ xs ) &= f\ x\ xs\ (h\ xs)
 
 \item Notation: $\langle\![ b, f ]\!\rangle$
 \end{itemize}
+
+\end{frame}
+
+\begin{frame}
+We will provide some explanations about the algebra and coalgebra nature.
 
 \end{frame}
 
@@ -509,26 +514,65 @@ f (\mu \ f) @<\text{fmap} \ g<< f\ a\\
 \end{CD}
 $
 
+~
+
+~
+
+~
 \end{center}
+
+\textit{Look at the whiteboard for a combined image}.
+
+
 \end{frame}
 
+
+\begin{frame}{Using fixed point}
+We can define catamorphism and anamorphism in a non-recursive way.
+
+\hin{168}{175}
+
+\end{frame}
+
+
+\begin{frame}{A note on notation}
+
+Autors use this rather unusual notation:
+
+
+$(f \xleftarrow{F} g) h = f \circ h_F \circ g$ 
+
+$h_F$ is lifted inside the functor $F$.
+
+Thus: $(f \xleftarrow{F} g)  = \lambda h. f \circ h_F \circ g$ 
+
+\end{frame}
+
+
 \begin{frame}{Notation summary}
-Expanding notation to arbitrary types:
+
+ 
+ 
 \begin{itemize}
 \item Catamorphism:
 
 $(\!|\phi|\!)_F = \mu(\phi \xleftarrow{F} out)$ 
 
+\hin{171}{171}
+
 \item Anamorphism:
 
 $[\!(\psi)\!]_F = \mu(in \xleftarrow{F} \psi )$ 
 
-\item Paramorphism:
+\hin{174}{174}
 
-$[\![\phi, \psi)\!]_F = \mu(\phi \xleftarrow{F} \psi )$ 
+\item Hylomorphism:
 
-The argument over the arrow is a part of three-operand composition in between its left and right operands.
+$[\![\phi, \psi]\!]_F = \mu(\phi \xleftarrow{F} \psi )$ 
 \end{itemize}
+
+\textit{Remember:} $(f \xleftarrow{F} g)  = \lambda h. f \circ h_F \circ g$ 
+
 
 \end{frame}
 
@@ -555,6 +599,9 @@ $$(\!| \phi |\!)\circ in = \phi \circ (\!| \phi |\!)$$
 
 Apply recursively, then $\phi$ again.
 
+\item Uniqueness Property
+
+$f = (\!| \phi |\!) \equiv  f \circ \bot = ( \!| \phi |\!) \circ \bot \land f \circ in = \phi \circ f_L$
 \end{itemize}
 
 \end{frame}
