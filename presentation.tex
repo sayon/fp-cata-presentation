@@ -537,7 +537,7 @@ We can define catamorphism and anamorphism in a non-recursive way.
 
 \begin{frame}{A note on notation}
 
-Autors use this rather unusual notation:
+Authors use this rather unusual notation:
 
 
 $(f \xleftarrow{F} g) h = f \circ h_F \circ g$ 
@@ -546,6 +546,9 @@ $h_F$ is lifted inside the functor $F$.
 
 Thus: $(f \xleftarrow{F} g)  = \lambda h. f \circ h_F \circ g$ 
 
+Also:
+
+$(f\ \Delta\  g) (x,y) = (f\  x, g \ y)$
 \end{frame}
 
 
@@ -569,6 +572,10 @@ $[\!(\psi)\!]_F = \mu(in \xleftarrow{F} \psi )$
 \item Hylomorphism:
 
 $[\![\phi, \psi]\!]_F = \mu(\phi \xleftarrow{F} \psi )$ 
+
+\item Paramorphism:
+
+$\langle\![ \mathcal{E} ]\!\rangle = \mu ( \lambda f. \mathcal{E} \circ (id\ \Delta\ f)_F \circ out) $
 \end{itemize}
 
 \textit{Remember:} $(f \xleftarrow{F} g)  = \lambda h. f \circ h_F \circ g$ 
@@ -587,7 +594,7 @@ For each morphism type we give:
 
 \begin{frame}{Utility: fixed point fusion}
 
-$f ( \bot ) = \bot \land f \circ g = h \circ f \Rightarrow f (\mu g) = \mu h $
+$f ( \bot ) = \bot \land f \circ g = h \circ f \Rightarrow f (\mu \ g) = \mu \ h $ (without proof)
 
 \end{frame}
 
@@ -597,15 +604,102 @@ $f ( \bot ) = \bot \land f \circ g = h \circ f \Rightarrow f (\mu g) = \mu h $
 
 $$(\!| \phi |\!)\circ in = \phi \circ (\!| \phi |\!)$$
 
-Apply recursively, then $\phi$ again.
+Apply recursively, then $\phi$ again. Compare with fixed point:
 
-\item Uniqueness Property
+$$x = \mu f \Rightarrow x = f \ x$$
 
-$f = (\!| \phi |\!) \equiv  f \circ \bot = ( \!| \phi |\!) \circ \bot \land f \circ in = \phi \circ f_L$
+\item \textbf{Uniqueness Property} (prove functions equality without explicit induction)
+
+$f = (\!| \phi |\!)_F \equiv  f \circ \bot = ( \!| \phi |\!)_F \circ \bot \land f \circ in = \phi \circ f_{\mu\ F}$
+
+Remember, \hasqel{In} is also a type ctor, applying isomorphism between $a$ and $F a$
 \end{itemize}
 
 \end{frame}
+
+
+\begin{frame}{Catamorphisms - Fusion law}
+
+Blend $cata\circ f$ into a single catamorphism.
+
+$$f \circ (\!|\phi|\!) =  (\!|\psi|\!)  \Leftarrow f \ \bot = \bot \land f \circ \phi = \psi \circ f_{\mu F}$$
+
+\textit{Look at the whiteboard for a fancy diagram}
+
+~
+
+\textbf{Useful variation}: $f$ is strict, not ``like $(\!|\psi|\!)$'':
+
+$$f \circ (\!|\phi|\!) =  (\!|\psi|\!)  \Leftarrow f \circ \bot = (\!|\psi|\!)  \circ \bot \land f \circ \phi = \psi \circ f_{\mu F}$$
+
+\end{frame}
+
+\begin{frame}{Injective functions are catamorphisms}
+
+$f: A \rightarrow B$\\
+$\phi: A_F \rightarrow A$
+
+Then:
+
+$$f \circ (\!|\phi|\!) = (\!|f \circ \phi \circ g_F |\!) \Leftarrow \begin{cases} f \bot = \bot \\ g \circ f = id\end{cases}$$
+
+Take $(\!|\phi|\!) = in$ :
+
+$$f = (\!|f \circ in \circ g_F |\!) \Leftarrow \begin{cases} f \bot = \bot \\ g \circ f = id\end{cases}$$
+\end{frame}
+
+
+\begin{frame}{Catamorphisms preserve strictness}
+
+A useful lemma for some proofs:
+
+$$\mu F \circ \bot = \bot \Leftarrow \forall f : F f  \circ \bot = \bot$$
+
+For cata:
+
+$(\!|\phi |\!) _{F} \circ \bot = \bot \equiv \phi \circ \bot = \bot $
+
+\end{frame}
+
+\begin{frame}{Example: fold-unfold}
+Whiteboard
+\end{frame}
+
+\begin{frame}{Anamorphisms}
+Evaluation rule:
+
+
+$$out \circ [\!(\psi )\!] = [\!(\psi )\!] _F \cdot \psi$$
+
+Apply $[\!(\psi )\!] $, then apply $[\!(\psi )\!]_F$ to the result.
+
+$$f = [\!(\psi )\!]  \equiv out \circ f = f_F \cdot \psi$$
+
+\end{frame}
+
+\begin{frame}{Fusion law} 
+
+$$[\!(\phi )\!] \circ f = [\!(\psi )\!]  \Leftarrow \phi \circ f = f_F \circ \psi$$
+
+Proof by fixed point fusion theorem with $f := (\circ f)$, $g := in \leftarrow^F \phi $, $h :=in \leftarrow^L \psi$
+
+\end{frame}
+\begin{frame}{Surjective function is an anamorphism}
+
+
+\end{frame}
+\begin{frame}{Examples}
+
+$iterate f = [\!(firstOfSum \circ id \Delta f  )\!] $
+
+$takewhile\ p = [\!(secondOfSum\ 'map'\  (VOID  | id \circ ( not\ p \circ second)? ) \circ out \!] $
+
+$f 'map' g \circ p?$ models if-then-else
+
+\end{frame}
 \begin{frame}
+
+
 ``Actually, even in Haskell recursion is not completely first class because the compiler does a terrible job of optimizing recursive code. This is why F-algebras and F-coalgebras are pervasive in high-performance Haskell libraries like vector, because they transform recursive code to non-recursive code, and the compiler does an amazing job of optimizing non-recursive code.'' (Gabriel Gonzales)
 
 \end{frame}
